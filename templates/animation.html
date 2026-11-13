@@ -62,70 +62,44 @@
 		}
 		recognition.start();
 	 }
-	function play()
-	{
-		var videoSource = new Array();
-		var	videos = document.getElementById("list").getElementsByTagName("li");
-		var j;
-		for(j=0;j<videos.length;j++)
-		{
-			videoSource[j] = "/static/" + videos[j].innerHTML +".mp4";
-		}
 
-		var i = 0; // define i
-		var videoCount = videoSource.length;
+    const player = document.getElementById('videoPlayer');
+    const words = Array.from(document.querySelectorAll('#list li'));
+    let currentIndex = 0;
+    let started = false;
 
-		function videoPlay(videoNum)
-		{
-			document.getElementById("list").getElementsByTagName("li")[videoNum].style.color = "#09edc7";
-			document.getElementById("list").getElementsByTagName("li")[videoNum].style.fontSize = "xx-large";
-			document.getElementById("videoPlayer").setAttribute("src", videoSource[videoNum]);
-	    	document.getElementById("videoPlayer").load();
-	    	document.getElementById("videoPlayer").play();
+    function playCurrent() {
+        if (!words.length) return;
+        words.forEach((word, index) => {
+            word.style.color = index === currentIndex ? '#09edc7' : '#feda6a';
+            word.style.fontSize = index === currentIndex ? 'xx-large' : '20px';
+        });
+        player.src = "/static/" + encodeURIComponent(words[currentIndex].textContent.trim()) + ".mp4";
+        player.load();
+        player.play().catch(() => { /* User can press Play to retry. */ });
+    }
 
-		}
-		document.getElementById('videoPlayer').addEventListener('ended', myHandler, false);
-		document.getElementById("list").getElementsByTagName("li")[0].style.color = "#09edc7";
-		document.getElementById("list").getElementsByTagName("li")[0].style.fontSize = "xx-large";
+    player.addEventListener('ended', () => {
+        currentIndex += 1;
+        if (currentIndex < words.length) {
+            playCurrent();
+        } else {
+            started = false;
+            currentIndex = 0;
+        }
+    });
 
-		videoPlay(0); // play the video
-
-		function myHandler()
-		{
-	 		document.getElementById("list").getElementsByTagName("li")[i].style.color = "#feda6a";
-			document.getElementById("list").getElementsByTagName("li")[i].style.fontSize = "20px";
-			i++;
-	    	if (i == videoCount)
-	    	{
-	       	    document.getElementById("videoPlayer").pause();
-	    	}
-	     	else
-	     	{
-	        	videoPlay(i);
-	    	}
-		}
-	}
-	/* LETS USE ONLY PLAY PAUSE BUTTON WITH 720 *420 ,IT FITS THE SCREEN
-	function makeBig() {
-	    document.getElementById("videoPlayer").width = 560;
-		document.getElementById("videoPlayer").height = 360;
-	}
-
-	function makeSmall() {
-	    document.getElementById("videoPlayer").width = 320;
-		document.getElementById("videoPlayer").height = 180;
-	}
-
-	function makeNormal() {
-	    document.getElementById("videoPlayer").width = 420;
-		document.getElementById("videoPlayer").height =280;
-	}*/
-	function playPause(){
-  		if (document.getElementById("videoPlayer").paused){
-    		play();}
-  		else{
-    		document.getElementById("videoPlayer").pause();}
-		}
+    function playPause() {
+        if (!words.length) return;
+        if (!started) {
+            started = true;
+            playCurrent();
+        } else if (player.paused) {
+            player.play().catch(() => {});
+        } else {
+            player.pause();
+        }
+    }
 
 	</script>
 
